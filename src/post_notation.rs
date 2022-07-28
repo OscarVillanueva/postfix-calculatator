@@ -30,15 +30,15 @@ pub mod postfix {
 
   // e -> stack empty
   // n -> no hay operador que se vaya a agregar
-  fn add_to_stack(stack: &String, operator: char, priority: u8) -> (char, String) {
+  fn add_to_stack(stack: &String, operator: char, priority: u8) -> (String, String) {
     
-    let mut taken_out = 'n';
+    let mut taken_out = "n".to_string();
 
     let mut new_stack = stack.clone();
 
     let mut chars = stack.chars();
-    let stack_top = chars.next().unwrap_or('e');
-    let previos_priority = get_symbol_priority(&stack_top);
+    let mut stack_top = chars.next().unwrap_or('e');
+    let mut previos_priority = get_symbol_priority(&stack_top);
 
     // Si la pila esta vacía mete el nuevo símbolo
     if stack_top == 'e' {
@@ -50,7 +50,7 @@ pub mod postfix {
     if priority == 4  {
       if operator == ')' {
 
-        taken_out = stack_top;
+        taken_out = stack_top.to_string();
   
         loop {
   
@@ -70,12 +70,39 @@ pub mod postfix {
 
     }
 
-    if previos_priority > priority && stack_top != '(' {
+    if previos_priority >= priority && stack_top != '(' {
 
-      taken_out = stack_top;
-      new_stack = operator.to_string();
-      new_stack.push_str(chars.as_str());
-      return (taken_out, new_stack);
+      taken_out = stack_top.to_string();
+
+      loop {
+        
+        stack_top = chars.next().unwrap_or('e');
+        previos_priority = get_symbol_priority(&stack_top);
+
+        if stack_top == 'e'{
+
+          new_stack = operator.to_string();
+          return (taken_out, new_stack)
+
+        }
+
+        if priority != previos_priority {
+
+          new_stack = operator.to_string();
+          new_stack.push(stack_top);
+          new_stack.push_str(chars.as_str());
+          return (taken_out, new_stack)
+
+        }
+
+        taken_out.push(stack_top);
+
+      }
+
+      // taken_out = stack_top.to_string();
+      // new_stack = operator.to_string();
+      // new_stack.push_str(chars.as_str());
+      // return (taken_out, new_stack);
 
     }
 
@@ -86,7 +113,7 @@ pub mod postfix {
 
   }
 
-  pub fn convert_to_post_fix(notation: &String ) {
+  pub fn convert_to_post_fix(notation: &String ) -> String{
 
     let mut supervisor = Supervisor::new();
     let mut priority: u8;
@@ -103,14 +130,13 @@ pub mod postfix {
         let ( taken_out, new_stack ) = add_to_stack(&supervisor.stack, symbol, priority);
         supervisor.stack = new_stack;
 
-        if taken_out != 'n' {
-          supervisor.postfix.push(taken_out);
+        if taken_out != "n" {
+          supervisor.postfix.push_str(&taken_out);
         }
       }
-
     }
 
-    println!("final: {}", supervisor.postfix)
+    supervisor.postfix
     
   }
 }
