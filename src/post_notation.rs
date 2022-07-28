@@ -1,6 +1,6 @@
 
 pub mod postfix {
-    use std::char;
+  use std::char;
 
   pub struct Supervisor {
     pub postfix: String,
@@ -72,6 +72,7 @@ pub mod postfix {
     if previos_priority >= priority && stack_top != '(' {
 
       taken_out = stack_top.to_string();
+      taken_out.push(' ');
 
       loop {
         
@@ -119,22 +120,31 @@ pub mod postfix {
       if [' ', '\n', '\r', '\t'].contains(&symbol) { continue; }
 
       if symbol == ';' {
+        supervisor.postfix.push(' ');
         supervisor.postfix.push_str(&supervisor.stack);
         supervisor.postfix.push(symbol);
+
+        if supervisor.postfix.contains("(") || supervisor.postfix.contains(")") {
+          panic!("Operación invalida");
+        }
+
       }
       else {
         if priority == 0 {
           supervisor.postfix.push(symbol)
         }
         else {
-  
-          supervisor.postfix.push(' ');
+
+          if symbol != '(' {
+            supervisor.postfix.push(' ');
+          }
 
           let ( taken_out, new_stack ) = add_to_stack(&supervisor.stack, symbol, priority);
           supervisor.stack = new_stack;
-  
+
           if taken_out != "n" {
             supervisor.postfix.push_str(&taken_out);
+            supervisor.postfix.push(' ');
           }
         }
       }
